@@ -1,0 +1,17 @@
+<div class="main-layout">
+  <mat-toolbar color="primary" class="mat-elevation-z24">
+    <div class="container">
+      <mat-icon>verified_user</mat-icon>
+      <span> База даних підлючена </span>
+    </div>
+    <div class="right container">
+      <mat-icon>person</mat-icon>
+      <span> Admin </span>
+    </div>
+  </mat-toolbar>
+
+  <div class="dashboard">
+    <app-new-schedule (newSchedule)="addNewSchedule()"></app-new-schedule>
+    <app-schedule-card *ngFor="let schedule of schedules; index as i" (routeSchedule)="routeSchedule(i)"></app-schedule-card>
+  </div>
+</div>
