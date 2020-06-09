@@ -1,11 +1,4 @@
-import {Teacher} from './Teacher';
-import {Subject} from './Subject';
-
-export interface Lesson {
-  subject: Subject;
-  teacher: Teacher;
-  time: number;
-}
+import {Lesson} from './Lesson';
 
 export class Group {
 

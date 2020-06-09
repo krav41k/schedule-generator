@@ -4,7 +4,6 @@ import {Teacher} from './Teacher';
 import {Room} from './Room';
 import {RoomType} from './RoomType';
 
-// export interface scheduleTable {}
 
 export class Schedule {
   rooms: Room[] = [];
@@ -12,8 +11,6 @@ export class Schedule {
   groups: Group[] = [];
   subjects: Subject[] = [];
   teachers: Teacher[] = [];
-
-
 
   constructor() {}
 }

@@ -3,7 +3,10 @@ import {WorkingTime} from './WorkingTime';
 export class Teacher {
   name;
   workingTimes: WorkingTime[] = [];
-  hours: {available, actually};
+  hours: {available, actually} = {
+    available: 0,
+    actually: 0
+  };
 
   days: string[] =  [
     'понедельник',
@@ -21,4 +24,8 @@ export class Teacher {
     5,
     6
   ];
+
+  timeProcessing() {
+
+  }
 }

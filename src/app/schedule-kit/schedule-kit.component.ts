@@ -266,7 +266,7 @@ export class ScheduleKitComponent implements OnInit, AfterContentInit, OnDestroy
   }
 
   groupSelect($event, item) {
-    this.selectedLesson = null;
+    this.selectedLesson = new Lesson(null, item, null);
     this.subjectSelect(null, null);
     this.selectedGroup = item;
 
@@ -284,7 +284,6 @@ export class ScheduleKitComponent implements OnInit, AfterContentInit, OnDestroy
     }
 
     this.selectedLesson = this.selectedGroup.lessonsInfo.find(value => value.subject === item);
-    console.log();
     // if (lesson !== undefined) {
     //   this.selectedLesson = lesson;
     // } else {
