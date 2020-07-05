@@ -6,14 +6,74 @@
       </button>
 
       <span fxFlex fxLayoutAlign="start center"> Розклад </span>
+      <div class="button-group">
+        <button mat-raised-button color="primary" (click)="goScheduleKit()">Редагувати</button>
+      </div>
     </div>
     <div class="right container">
       <mat-icon>person</mat-icon>
       <span> Admin </span>
     </div>
   </mat-toolbar>
+  <div class="body">
+    <ng-template [ngIf]="(state | async) === true" [ngIfThen]="scheduleTable" [ngIfElse]="loading"></ng-template>
 
-  <div class="schedule">
+    <ng-template #scheduleTable>
+      <div class="schedule" fxLayout="row" fxLayoutAlign="start none">
+        <div class="hint-layout">
+          <div class="hint-day">Понеділок</div>
+          <div class="hint-day">Вівторок</div>
+          <div class="hint-day">Середа</div>
+          <div class="hint-day">Чертверг</div>
+          <div class="hint-day">П'ятниця</div>
+        </div>
+        <ng-template ngFor let-group [ngForOf]="schedule.groups">
+          <div class="group-layout">
+            <h1 class="group-label">{{group.name}}</h1>
+            <div class="day-layout" style="background: #FF4500">
+              <ng-template ngFor let-lesson [ngForOf]="group.scheduleTable.mon" let-i="index">
+                <ng-template [ngIf]="i<6">
+                  <app-lesson-item [lessonIdx]="i + 1" [lesson]="lesson" [secondLesson]="group.scheduleTable.mon[i+6]" [lessonType]="findLessonType(lesson)"></app-lesson-item>
+                </ng-template>
+              </ng-template>
+            </div>
+            <div class="day-layout" style="background: #45B39D">
+              <ng-template ngFor let-lesson [ngForOf]="group.scheduleTable.tue" let-i="index">
+                <ng-template [ngIf]="i<6">
+                  <app-lesson-item [lessonIdx]="i + 1" [lesson]="lesson" [secondLesson]="group.scheduleTable.mon[i+6]" [lessonType]="findLessonType(lesson)"></app-lesson-item>
+                </ng-template>
+              </ng-template>
+            </div>
+            <div class="day-layout" style="background: #DC7633">
+              <ng-template ngFor let-lesson [ngForOf]="group.scheduleTable.wed" let-i="index">
+                <ng-template [ngIf]="i<6">
+                  <app-lesson-item [lessonIdx]="i + 1" [lesson]="lesson" [secondLesson]="group.scheduleTable.mon[i+6]" [lessonType]="findLessonType(lesson)"></app-lesson-item>
+                </ng-template>
+              </ng-template>
+            </div>
+            <div class="day-layout" style="background: #58D68D">
+              <ng-template ngFor let-lesson [ngForOf]="group.scheduleTable.thu" let-i="index">
+                <ng-template [ngIf]="i<6">
+                  <app-lesson-item [lessonIdx]="i + 1" [lesson]="lesson" [secondLesson]="group.scheduleTable.mon[i+6]" [lessonType]="findLessonType(lesson)"></app-lesson-item>
+                </ng-template>
+              </ng-template>
+            </div>
+            <div class="day-layout" style="background: #F5B041">
+              <ng-template ngFor let-lesson [ngForOf]="group.scheduleTable.fri" let-i="index">
+                <ng-template [ngIf]="i<6">
+                  <app-lesson-item [lessonIdx]="i + 1" [lesson]="lesson" [secondLesson]="group.scheduleTable.mon[i+6]" [lessonType]="findLessonType(lesson)"></app-lesson-item>
+                </ng-template>
+              </ng-template>
+            </div>
+          </div>
+        </ng-template>
+      </div>
+    </ng-template>
 
+    <ng-template #loading>
+      <div fxLayout="row" fxLayoutAlign="center center" fxFlex="100">
+        <mat-spinner></mat-spinner>
+      </div>
+    </ng-template>
   </div>
 </div>

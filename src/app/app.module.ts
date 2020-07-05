@@ -22,6 +22,8 @@ import {MatCheckboxModule} from '@angular/material/checkbox';
 import {MatSelectModule} from '@angular/material/select';
 import { ScheduleCardComponent } from './schedule-card/schedule-card.component';
 import { ScheduleTableComponent } from './schedule-table/schedule-table.component';
+import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
+import { LessonItemComponent } from './lesson-item/lesson-item.component';
 
 @NgModule({
   declarations: [
@@ -33,6 +35,7 @@ import { ScheduleTableComponent } from './schedule-table/schedule-table.componen
     SubjectItemDirective,
     ScheduleCardComponent,
     ScheduleTableComponent,
+    LessonItemComponent,
   ],
     imports: [
         BrowserModule,
@@ -50,7 +53,8 @@ import { ScheduleTableComponent } from './schedule-table/schedule-table.componen
         FlexModule,
         FlexLayoutModule,
         MatCheckboxModule,
-        MatSelectModule
+        MatSelectModule,
+        MatProgressSpinnerModule
     ],
   providers: [],
   bootstrap: [AppComponent]

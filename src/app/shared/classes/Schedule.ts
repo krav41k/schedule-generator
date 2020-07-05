@@ -12,5 +12,7 @@ export class Schedule {
   subjects: Subject[] = [];
   teachers: Teacher[] = [];
 
+  complete = false;
+
   constructor() {}
 }

@@ -1,0 +1,23 @@
+<ng-template [ngIf]="lessonType !== undefined">
+  <ng-template [ngIf]="lessonType === 0">
+    <div fxLayout="column" fxLayoutAlign="center center" class="cell style-1">
+      <div>{{lessonIdx}}.</div>
+      <div>---</div>
+    </div>
+  </ng-template>
+  <ng-template [ngIf]="lessonType === 1">
+    <div fxLayout="column" fxLayoutAlign="center center" class="cell style-2">
+      <div>{{lessonIdx}}.</div>
+      <div>{{lesson.subject.name}}:{{lesson.teacher.name}}</div>
+      <ng-template [ngIf]="secondLesson !== undefined">
+        <div>{{secondLesson.subject.name}}:{{secondLesson.teacher.name}}</div>
+      </ng-template>
+    </div>
+  </ng-template>
+  <ng-template [ngIf]="lessonType === 2">
+    <div fxLayout="column" fxLayoutAlign="center center" class="cell style-3">
+      <div>{{lessonIdx}}. {{lesson.subject.name}}:</div>
+      <div>{{lesson.teacher.name}}</div>
+    </div>
+  </ng-template>
+</ng-template>

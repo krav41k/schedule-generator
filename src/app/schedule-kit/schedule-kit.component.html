@@ -13,291 +13,296 @@
     </div>
   </mat-toolbar>
 
-  <div class="schedule">
-    <mat-horizontal-stepper>
+  <ng-template [ngIf]="loadingStatus" [ngIfThen]="scheduleKit" [ngIfElse]="loading"></ng-template>
 
-      <mat-step [stepControl]="firstFormGroup">
-        <form [formGroup]="firstFormGroup">
-          <ng-template matStepLabel>Додання аудиторій</ng-template>
-          <div fxLayout="row" class="composer">
-            <div fxLayout="column" fxLayoutAlign="start center" class="triplet-rule float-list">
-              <div *ngFor="let item of schedule.rooms; index as i" (click)="itemSelect($event, item)" id="item-div">
-                <mat-form-field>
-                  <mat-label>Кількість місць</mat-label>
-                  <input matInput formControlName="size{{i + 1}}" [(ngModel)]="schedule.rooms[i].size" placeholder="0" autocomplete="off" type="number">
-                </mat-form-field>
-                <mat-form-field>
-                  <mat-label>Кількість аудиторій</mat-label>
-                  <input matInput formControlName="count{{i + 1}}" [(ngModel)]="schedule.rooms[i].count" placeholder="0" autocomplete="off" type="number">
-                </mat-form-field>
-              </div>
-            </div>
-            <div fxLayout="column" class="triplet-rule workshop">
-              <div fxLayout="row" fxLayoutAlign="center start">
-                <span fxFlex class="workshop-label">
-                  Кількість місць:
-                  {{selectedItem === undefined ? 0 : selectedItem.size === undefined ? 0 : selectedItem.size}}
-                </span>
-                <span fxFlex class="workshop-label">
-                  Кількість аудиторій:
-                  {{selectedItem === undefined ? 0 : selectedItem.count === undefined ? 0 : selectedItem.count}}
-                </span>
-              </div>
-              <div fxLayout="column">
-                <div *ngFor="let item of schedule.roomTypes; index as i" fxLayout="row" fxLayoutAlign="start center" class="workshop-item external">
-                  <mat-checkbox
-                    color="primary"
-                    [checked]="roomTypeChecker(item)"
-                    [disabled]="roomStateChecker(item)"
-                    (click)="assignType(item)">
-                  </mat-checkbox>
+  <ng-template #scheduleKit>
+    <div class="schedule">
+      <mat-horizontal-stepper>
+
+        <mat-step [stepControl]="firstFormGroup">
+          <form [formGroup]="firstFormGroup">
+            <ng-template matStepLabel>Додання аудиторій</ng-template>
+            <div fxLayout="row" class="composer">
+              <div fxLayout="column" fxLayoutAlign="start center" class="triplet-rule float-list">
+                <div *ngFor="let item of schedule.rooms; index as i" (click)="itemSelect($event, item)" id="item-div">
                   <mat-form-field>
-                    <mat-label>Тип аудиторії</mat-label>
-                    <input matInput formControlName="type{{i + 1}}" [(ngModel)]="schedule.roomTypes[i].name" autocomplete="off">
-                  </mat-form-field>
-                  <div fxLayout fxLayoutAlign="center center" matRipple (click)="addNewRoomType()" class="circle-border">+</div>
-                </div>
-              </div>
-            </div>
-            <div fxFlex fxLayoutAlign="center center" class="triplet-rule" style="height: 100%">
-              <div class="add-plus-one" matRipple (click)="addNewRoom()">+1</div>
-              <button
-                mat-raised-button
-                matStepperNext
-                color="primary"
-                class="routing-button"
-              >Далі</button>
-            </div>
-          </div>
-        </form>
-      </mat-step>
-
-      <mat-step [stepControl]="secondFormGroup">
-        <form [formGroup]="secondFormGroup">
-          <ng-template matStepLabel>Додання предметів</ng-template>
-          <div fxLayout="row" class="composer">
-            <div fxLayoutGap class="triplet-rule" style="margin-top: 20px">
-              <label *ngFor="let item of this.schedule.subjects; index as i">
-                <input
-                  appSubjectItem
-                  color="{{item.color}}"
-                  inputType="subject"
-                  formControlName="name{{i + 1}}"
-                  [(ngModel)]="item.name"
-                  placeholder="Название предмета"
-                  (click)="placeholderClick($event); subjectSelect($event, item)"
-                  (blur)="placeholderBlur($event)"
-                  class="subject-item external"
-                >
-              </label>
-            </div>
-            <div fxLayout="column" class="triplet-rule workshop">
-              <div fxLayout="column">
-                <div *ngFor="let item of schedule.roomTypes; index as i" fxLayout="row" fxLayoutAlign="start center" class="workshop-item external">
-                  <mat-checkbox
-                    color="primary"
-                    [checked]="subjectCheckboxCheck(item)"
-                    [disabled]="true"
-                    (click)="manageTypes(item)"
-                  >
-                  </mat-checkbox>
-                  <span class="room-type">{{item.name}}</span>
-                </div>
-              </div>
-            </div>
-            <div fxFlex fxLayoutAlign="center center" class="triplet-rule" style="height: 100%">
-              <div class="add-plus-one" matRipple (click)="addNewSubject()">+1</div>
-              <div fxLayout="column" fxLayoutAlign="center">
-                <button mat-raised-button matStepperNext color="primary" class="routing-button">Далі</button>
-                <button mat-raised-button matStepperPrevious color="primary" class="routing-button">Назад</button>
-              </div>
-            </div>
-          </div>
-        </form>
-      </mat-step>
-
-      <mat-step [stepControl]="thirdFormGroup">
-        <form [formGroup]="thirdFormGroup">
-          <ng-template matStepLabel>Додання викладачів</ng-template>
-          <div fxLayout="row" class="composer">
-            <div fxLayout="column" fxLayoutAlign="start center" class="triplet-rule float-list">
-              <div
-                *ngFor="let item of this.schedule.teachers; index as i"
-                (click)="teacherSelect($event, item)"
-                id="teacher-div"
-              >
-                <mat-form-field>
-                  <mat-label>Ім'я викладача</mat-label>
-                  <input
-                    matInput
-                    formControlName="name{{i + 1}}"
-                    [(ngModel)]="schedule.teachers[i].name"
-                    autocomplete="off">
-                </mat-form-field>
-              </div>
-            </div>
-            <div fxLayout="column" class="triplet-rule workshop">
-              <div fxLayout="column">
-                <div
-                  *ngFor="let item of selectedTeacher.workingTimes; index as i"
-                  fxLayout="row" fxLayoutAlign="start center"
-                  class="workshop-item external"
-                >
-                  <mat-form-field>
-                    <mat-label>День</mat-label>
-                    <mat-select
-                      formControlName="days{{i + 1}}"
-                      [(ngModel)]="item.days"
-                      multiple
-                      (openedChange)="dayPickerOpened = !dayPickerOpened">
-                      <mat-select-trigger>
-                        {{item.days ? item.days[0] : ''}}
-                        <span *ngIf="item.days?.length > 1" class="example-additional-selection">
-                          (+{{item.days.length - 1}} {{item.days?.length === 2 ? 'другой' : 'другие'}})
-                        </span>
-                      </mat-select-trigger>
-                      <mat-option
-                        *ngFor="let day of selectedTeacher.days"
-                        (onSelectionChange)="dayPicker(day, item)"
-                        [value]="day"
-                      >{{day}}</mat-option>
-                    </mat-select>
+                    <mat-label>Кількість місць</mat-label>
+                    <input matInput formControlName="size{{i + 1}}" [(ngModel)]="schedule.rooms[i].size" placeholder="0" autocomplete="off" type="number">
                   </mat-form-field>
                   <mat-form-field>
-                    <mat-label>Пара</mat-label>
-                    <mat-select
-                      formControlName="pairs{{i + 1}}"
-                      [(ngModel)]="item.pairs"
-                      multiple
-                      (openedChange)="pairPickerOpened = !pairPickerOpened">
-                      <mat-select-trigger>
-                        {{item.pairs ? item.pairs[0] : ''}}
-                        <span *ngIf="item.pairs?.length > 1">
-                          (+{{item.pairs.length - 1}} {{item.pairs?.length === 2 ? 'другая' : 'другие'}})
-                        </span>
-                      </mat-select-trigger>
-                      <mat-option
-                        *ngFor="let pair of selectedTeacher.pairs"
-                        (onSelectionChange)="pairPicker(pair, item)"
-                        [value]="pair"
-                      >{{pair}}</mat-option>
-                    </mat-select>
-                  </mat-form-field>
-                  <div fxLayout fxLayoutAlign="center center" matRipple (click)="addNewWorkingTime()" class="circle-border">+</div>
-                </div>
-              </div>
-            </div>
-            <div fxFlex fxLayoutAlign="center center" class="triplet-rule" style="height: 100%">
-              <div class="add-plus-one" matRipple (click)="addNewTeacher()">+1</div>
-              <div fxLayout="column" fxLayoutAlign="center">
-                <button mat-raised-button matStepperNext color="primary" class="routing-button">Далі</button>
-                <button mat-raised-button matStepperPrevious color="primary" class="routing-button">Назад</button>
-              </div>
-            </div>
-          </div>
-        </form>
-      </mat-step>
-
-      <mat-step [stepControl]="fourthFormGroup">
-        <form [formGroup]="fourthFormGroup">
-          <ng-template matStepLabel>Додання предметів</ng-template>
-          <div fxLayout="row" class="composer">
-            <div fxLayout="column" fxLayoutAlign="start center" class="triplet-rule">
-              <div fxLayout="column" fxLayoutAlign="start center" class="workshop-groups">
-                <div
-                  *ngFor="let item of this.schedule.groups; index as i"
-                  (click)="groupSelect($event, item)"
-                  id="groups-div">
-                  <mat-form-field [style.width.px]=110>
-                    <mat-label>Назва групи</mat-label>
-                    <input
-                      matInput
-                      formControlName="name{{i + 1}}"
-                      [(ngModel)]="schedule.groups[i].name"
-                      autocomplete="off">
-                  </mat-form-field>
-                  <mat-form-field [style.width.px]=100>
-                    <mat-label>Кількість студентів</mat-label>
-                    <input
-                      matInput
-                      formControlName="students{{i + 1}}"
-                      [(ngModel)]="schedule.groups[i].numStudents"
-                      type="number"
-                      autocomplete="off">
-                  </mat-form-field>
-                  <mat-form-field [style.width.px]=40>
-                    <mat-label>Курс</mat-label>
-                    <input
-                      matInput
-                      formControlName="course{{i + 1}}"
-                      [(ngModel)]="schedule.groups[i].course"
-                      type="number"
-                      autocomplete="off">
-                  </mat-form-field>
-                  <mat-form-field [style.width.px]=40>
-                    <mat-label>Смена</mat-label>
-                    <input
-                      matInput
-                      formControlName="shift{{i + 1}}"
-                      [(ngModel)]="schedule.groups[i].shift"
-                      type="number"
-                      autocomplete="off">
+                    <mat-label>Кількість аудиторій</mat-label>
+                    <input matInput formControlName="count{{i + 1}}" [(ngModel)]="schedule.rooms[i].count" placeholder="0" autocomplete="off" type="number">
                   </mat-form-field>
                 </div>
               </div>
-              <div fxLayout="row" fxLayoutAlign="space-between end" style="width: 75%">
-                <button mat-raised-button matStepperPrevious color="primary" class="routing-button">Назад</button>
-                <div class="add-plus-one small" matRipple (click)="addNewGroup()">+1</div>
-                <button mat-raised-button matStepperNext color="primary" class="routing-button" (click)="completeSchedule()">Далі</button>
+              <div fxLayout="column" class="triplet-rule workshop">
+                <div fxLayout="row" fxLayoutAlign="center start">
+                  <span fxFlex class="workshop-label">
+                    Кількість місць:
+                    {{selectedItem === undefined ? 0 : selectedItem.size === undefined ? 0 : selectedItem.size}}
+                  </span>
+                  <span fxFlex class="workshop-label">
+                    Кількість аудиторій:
+                    {{selectedItem === undefined ? 0 : selectedItem.count === undefined ? 0 : selectedItem.count}}
+                  </span>
+                </div>
+                <div fxLayout="column">
+                  <div *ngFor="let item of schedule.roomTypes; index as i" fxLayout="row" fxLayoutAlign="start center" class="workshop-item external">
+                    <mat-checkbox
+                      color="primary"
+                      [checked]="roomTypeChecker(item)"
+                      [disabled]="roomStateChecker(item)"
+                      (click)="assignType(item)">
+                    </mat-checkbox>
+                    <mat-form-field>
+                      <mat-label>Тип аудиторії</mat-label>
+                      <input matInput formControlName="type{{i + 1}}" [(ngModel)]="schedule.roomTypes[i].name" autocomplete="off">
+                    </mat-form-field>
+                    <div fxLayout fxLayoutAlign="center center" matRipple (click)="addNewRoomType()" class="circle-border">+</div>
+                  </div>
+                </div>
+              </div>
+              <div fxFlex fxLayoutAlign="center center" class="triplet-rule" style="height: 100%">
+                <div class="add-plus-one" matRipple (click)="addNewRoom()">+1</div>
+                <button
+                  mat-raised-button
+                  matStepperNext
+                  color="primary"
+                  class="routing-button"
+                >Далі</button>
               </div>
             </div>
+          </form>
+        </mat-step>
 
-            <div fxLayoutGap class="triplet-rule workshop-item workshop-left-wall">
-              <div
-                *ngFor="let item of this.schedule.subjects; index as i"
-                class="subject-label"
-                (click)="subjectLabelSelect($event, item); subjectLessonSelect(item)"
-                id="subject-label"
-              >
-              <label>
+        <mat-step [stepControl]="secondFormGroup">
+          <form [formGroup]="secondFormGroup">
+            <ng-template matStepLabel>Додання предметів</ng-template>
+            <div fxLayout="row" class="composer">
+              <div fxLayoutGap class="triplet-rule" style="margin-top: 20px">
+                <label *ngFor="let item of this.schedule.subjects; index as i">
                   <input
                     appSubjectItem
                     color="{{item.color}}"
                     inputType="subject"
-                    formControlName="subject{{i + 1}}"
+                    formControlName="name{{i + 1}}"
                     [(ngModel)]="item.name"
-                    placeholder="Назва предмету"
-                    (click)="placeholderClick($event);"
+                    placeholder="Название предмета"
+                    (click)="placeholderClick($event); subjectSelect($event, item)"
                     (blur)="placeholderBlur($event)"
-                    class="subject-item"
-                  >
-                  <input
-                    appSubjectItem
-                    color="{{item.color}}"
-                    inputType="time"
-                    type="number"
-                    step="0.5"
-                    formControlName="subjectTime{{i + 1}}"
-                    [ngModel]="getLessonTime(item)"
-                    (ngModelChange)="setLessonTime($event, item)"
-                    class="subject-time-item"
+                    class="subject-item external"
                   >
                 </label>
               </div>
+              <div fxLayout="column" class="triplet-rule workshop">
+                <div fxLayout="column">
+                  <div *ngFor="let item of schedule.roomTypes; index as i" fxLayout="row" fxLayoutAlign="start center" class="workshop-item external">
+                    <mat-checkbox
+                      color="primary"
+                      [checked]="subjectCheckboxCheck(item)"
+                      [disabled]="true"
+                      (click)="manageTypes(item)"
+                    >
+                    </mat-checkbox>
+                    <span class="room-type">{{item.name}}</span>
+                  </div>
+                </div>
+              </div>
+              <div fxFlex fxLayoutAlign="center center" class="triplet-rule" style="height: 100%">
+                <div class="add-plus-one" matRipple (click)="addNewSubject()">+1</div>
+                <div fxLayout="column" fxLayoutAlign="center">
+                  <button mat-raised-button matStepperNext color="primary" class="routing-button">Далі</button>
+                  <button mat-raised-button matStepperPrevious color="primary" class="routing-button">Назад</button>
+                </div>
+              </div>
             </div>
+          </form>
+        </mat-step>
 
-            <div class="triplet-rule workshop-left-wall">
-              <span
-                *ngFor="let item of this.schedule.teachers; index as i"
-                (click)="addTeacher(item)"
-                [classList]="selectedLesson?.teacher === item ? 'selected-teacher workshop-item external' : 'workshop-item external'">
-                {{item.name}}
-              </span>
+        <mat-step [stepControl]="thirdFormGroup">
+          <form [formGroup]="thirdFormGroup">
+            <ng-template matStepLabel>Додання викладачів</ng-template>
+            <div fxLayout="row" class="composer">
+              <div fxLayout="column" fxLayoutAlign="start center" class="triplet-rule float-list">
+                <div
+                  *ngFor="let item of this.schedule.teachers; index as i"
+                  (click)="teacherSelect($event, item)"
+                  id="teacher-div"
+                >
+                  <mat-form-field>
+                    <mat-label>Ім'я викладача</mat-label>
+                    <input
+                      matInput
+                      formControlName="name{{i + 1}}"
+                      [(ngModel)]="schedule.teachers[i].name"
+                      autocomplete="off">
+                  </mat-form-field>
+                </div>
+              </div>
+              <div fxLayout="column" class="triplet-rule workshop">
+                <div fxLayout="column">
+                  <div
+                    *ngFor="let item of selectedTeacher.workingTimes; index as i"
+                    fxLayout="row" fxLayoutAlign="start center"
+                    class="workshop-item external"
+                  >
+                    <mat-form-field>
+                      <mat-label>День</mat-label>
+                      <mat-select
+                        formControlName="days{{i + 1}}"
+                        [(ngModel)]="item.days"
+                        multiple
+                        (openedChange)="dayPickerOpened = !dayPickerOpened">
+                        <mat-select-trigger>
+                          {{item.days ? item.days[0] : ''}}
+                          <span *ngIf="item.days?.length > 1" class="example-additional-selection">
+                            (+{{item.days.length - 1}} {{item.days?.length === 2 ? 'другой' : 'другие'}})
+                          </span>
+                        </mat-select-trigger>
+                        <mat-option
+                          *ngFor="let day of selectedTeacher.days"
+                          (onSelectionChange)="dayPicker(day, item)"
+                          [value]="day"
+                        >{{day}}</mat-option>
+                      </mat-select>
+                    </mat-form-field>
+                    <mat-form-field>
+                      <mat-label>Пара</mat-label>
+                      <mat-select
+                        formControlName="pairs{{i + 1}}"
+                        [(ngModel)]="item.pairs"
+                        multiple
+                        (openedChange)="pairPickerOpened = !pairPickerOpened">
+                        <mat-select-trigger>
+                          {{item.pairs ? item.pairs[0] : ''}}
+                          <span *ngIf="item.pairs?.length > 1">
+                            (+{{item.pairs.length - 1}} {{item.pairs?.length === 2 ? 'другая' : 'другие'}})
+                          </span>
+                        </mat-select-trigger>
+                        <mat-option
+                          *ngFor="let pair of selectedTeacher.pairs"
+                          (onSelectionChange)="pairPicker(pair, item)"
+                          [value]="pair"
+                        >{{pair}}</mat-option>
+                      </mat-select>
+                    </mat-form-field>
+                    <div fxLayout fxLayoutAlign="center center" matRipple (click)="addNewWorkingTime()" class="circle-border">+</div>
+                  </div>
+                </div>
+              </div>
+              <div fxFlex fxLayoutAlign="center center" class="triplet-rule" style="height: 100%">
+                <div class="add-plus-one" matRipple (click)="addNewTeacher()">+1</div>
+                <div fxLayout="column" fxLayoutAlign="center">
+                  <button mat-raised-button matStepperNext color="primary" class="routing-button">Далі</button>
+                  <button mat-raised-button matStepperPrevious color="primary" class="routing-button">Назад</button>
+                </div>
+              </div>
             </div>
-          </div>
-        </form>
-      </mat-step>
+          </form>
+        </mat-step>
 
-    </mat-horizontal-stepper>
-  </div>
+        <mat-step [stepControl]="fourthFormGroup">
+          <form [formGroup]="fourthFormGroup">
+            <ng-template matStepLabel>Додання предметів</ng-template>
+            <div fxLayout="row" class="composer">
+              <div fxLayout="column" fxLayoutAlign="start center" class="triplet-rule">
+                <div fxLayout="column" fxLayoutAlign="start center" class="workshop-groups">
+                  <div
+                    *ngFor="let item of this.schedule.groups; index as i"
+                    (click)="groupSelect($event, item)"
+                    id="groups-div">
+                    <mat-form-field [style.width.px]=110>
+                      <mat-label>Назва групи</mat-label>
+                      <input
+                        matInput
+                        formControlName="name{{i + 1}}"
+                        [(ngModel)]="schedule.groups[i].name"
+                        autocomplete="off">
+                    </mat-form-field>
+                    <mat-form-field [style.width.px]=100>
+                      <mat-label>Кількість студентів</mat-label>
+                      <input
+                        matInput
+                        formControlName="students{{i + 1}}"
+                        [(ngModel)]="schedule.groups[i].numStudents"
+                        type="number"
+                        autocomplete="off">
+                    </mat-form-field>
+                    <mat-form-field [style.width.px]=40>
+                      <mat-label>Курс</mat-label>
+                      <input
+                        matInput
+                        formControlName="course{{i + 1}}"
+                        [(ngModel)]="schedule.groups[i].course"
+                        type="number"
+                        autocomplete="off">
+                    </mat-form-field>
+                    <mat-form-field [style.width.px]=40>
+                      <mat-label>Смена</mat-label>
+                      <input
+                        matInput
+                        formControlName="shift{{i + 1}}"
+                        [(ngModel)]="schedule.groups[i].shift"
+                        type="number"
+                        autocomplete="off">
+                    </mat-form-field>
+                  </div>
+                </div>
+                <div fxLayout="row" fxLayoutAlign="space-between end" style="width: 75%">
+                  <button mat-raised-button matStepperPrevious color="primary" class="routing-button">Назад</button>
+                  <div class="add-plus-one small" matRipple (click)="addNewGroup()">+1</div>
+                  <button mat-raised-button matStepperNext color="primary" class="routing-button" (click)="completeSchedule()">Далі</button>
+                </div>
+              </div>
+
+              <div fxLayoutGap class="triplet-rule workshop-item workshop-left-wall">
+                <div
+                  *ngFor="let item of this.schedule.subjects; index as i"
+                  class="subject-label"
+                  (click)="subjectLabelSelect($event, item)"
+                  id="subject-label"
+                >
+                    <input
+                      appSubjectItem
+                      color="{{item.color}}"
+                      inputType="subject"
+                      formControlName="subject{{i + 1}}"
+                      [ngModel]="item.name"
+                      readonly
+                      class="subject-item"
+                    >
+                    <input
+                      appSubjectItem
+                      color="{{item.color}}"
+                      inputType="time"
+                      type="number"
+                      step="0.5"
+                      formControlName="subjectTime{{i + 1}}"
+                      [ngModel]="getLessonTime(item)"
+                      (input)="setLessonTime($event, item)"
+                      class="subject-time-item"
+                    >
+                </div>
+              </div>
+
+              <div class="triplet-rule workshop-left-wall">
+                <span
+                  *ngFor="let item of this.schedule.teachers; index as i"
+                  (click)="selectLessonTeacher(item)"
+                  [classList]="selectedLessonTeacher === item ? 'selected-teacher workshop-item external' : 'workshop-item external'">
+                  {{item.name}}
+                </span>
+              </div>
+            </div>
+          </form>
+        </mat-step>
+      </mat-horizontal-stepper>
+    </div>
+  </ng-template>
+
+  <ng-template #loading>
+    <div>
+      <mat-spinner></mat-spinner>
+    </div>
+  </ng-template>
 </div>

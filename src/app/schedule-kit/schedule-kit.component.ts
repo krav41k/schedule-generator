@@ -21,6 +21,8 @@ export class ScheduleKitComponent implements OnInit, AfterContentInit, OnDestroy
 
   @ViewChild('input') input: MatInput;
 
+  loadingStatus = false;
+
   iSchedule;
 
   firstFormGroup: FormGroup;
@@ -42,7 +44,9 @@ export class ScheduleKitComponent implements OnInit, AfterContentInit, OnDestroy
 
   selectedGroupEl;
   selectedGroup;
-  selectedLesson;
+  selectedLessonTeacher;
+  selectedLessonSubject;
+  selectedLessonSubjectEl;
 
   urlSub;
 
@@ -52,19 +56,27 @@ export class ScheduleKitComponent implements OnInit, AfterContentInit, OnDestroy
     private route: ActivatedRoute,
     private router: Router
   ) {
-    this.urlSub = this.route.params.subscribe(async (params) => {
+    this.urlSub = this.route.params.subscribe( (params) => {
       this.iSchedule = params.id;
       const schedule = this.sm.getSchedule(params.id);
-      await schedule === undefined ? this.router.navigate(['/dashboard']) : this.schedule = schedule;
+      if (schedule === undefined) {
+        this.router.navigate(['/dashboard']);
+      } else {
+        this.schedule = schedule;
+        this.build();
+        this.loadingStatus = true;
+      }
     });
   }
 
-  ngOnInit() {
+  ngOnInit() {}
+
+  build() {
     this.firstFormGroup = this.formBuilder.group({});
     this.secondFormGroup = this.formBuilder.group({});
     this.thirdFormGroup = this.formBuilder.group({});
     this.fourthFormGroup = this.formBuilder.group({});
-    console.log(this.schedule);
+    this.schedule.complete = false;
     if (this.schedule.rooms.length === 0) {
       this.addNewRoom();
       this.addNewSubject();
@@ -114,17 +126,17 @@ export class ScheduleKitComponent implements OnInit, AfterContentInit, OnDestroy
   }
 
   subjectLabelSelect(event, subject) {
-    if (this.selectedSubjectEl !== undefined) {
-      this.selectedSubjectEl.classList.remove('selected-subject');
-    }
-
-    if (event === null) {
+    if (event === null || this.selectedLessonSubject === subject) {
       return false;
     }
 
-    this.selectedSubjectEl = event.path.find(value => value.id === 'subject-label');
-    this.selectedSubjectEl.classList.add('selected-subject');
-    this.selectedSubject = subject;
+    if (this.selectedLessonSubjectEl !== undefined) {
+      this.selectedLessonSubjectEl.classList.remove('selected-subject');
+    }
+
+    this.selectedLessonSubjectEl = event.path.find(value => value.id === 'subject-label');
+    this.selectedLessonSubjectEl.classList.add('selected-subject');
+    this.selectedLessonSubject = subject;
   }
 
   addNewRoom() {
@@ -158,14 +170,6 @@ export class ScheduleKitComponent implements OnInit, AfterContentInit, OnDestroy
     this.fourthFormGroup.addControl(`shift${this.schedule.groups.length}`, new FormControl('', Validators.required));
   }
 
-  addTeacher(item) {
-    if (this.selectedLesson === undefined) {
-      return false;
-    }
-
-    this.selectedLesson.teacher = item;
-  }
-
   private renderSchedule() {
 
     this.schedule.rooms.forEach((value, index) => {
@@ -176,10 +180,16 @@ export class ScheduleKitComponent implements OnInit, AfterContentInit, OnDestroy
     this.schedule.subjects.forEach((value, index) => {
       this.secondFormGroup.addControl(`name${index + 1}`, new FormControl('', Validators.required));
       this.fourthFormGroup.addControl(`subject${index + 1}`, new FormControl('', Validators.required));
+      this.fourthFormGroup.addControl(`subjectTime${index + 1}`, new FormControl('', Validators.required));
     });
 
     this.schedule.teachers.forEach((value, index) => {
       this.thirdFormGroup.addControl(`name${index + 1}`, new FormControl('', Validators.required));
+      value.workingTimes.forEach((v, i) => {
+        console.log(i);
+        this.thirdFormGroup.addControl(`days${i + 1}`, new FormControl());
+        this.thirdFormGroup.addControl(`pairs${i + 1}`, new FormControl());
+      });
     });
 
     this.schedule.roomTypes.forEach((value, index) => {
@@ -266,7 +276,7 @@ export class ScheduleKitComponent implements OnInit, AfterContentInit, OnDestroy
   }
 
   groupSelect($event, item) {
-    this.selectedLesson = new Lesson(null, item, null);
+    this.selectedLessonTeacher = undefined;
     this.subjectSelect(null, null);
     this.selectedGroup = item;
 
@@ -278,38 +288,48 @@ export class ScheduleKitComponent implements OnInit, AfterContentInit, OnDestroy
     this.selectedGroupEl.style.background = 'white';
   }
 
-  subjectLessonSelect(item) {
+  selectLessonTeacher(item) {
     if (this.selectedGroup === undefined) {
       return false;
     }
 
-    this.selectedLesson = this.selectedGroup.lessonsInfo.find(value => value.subject === item);
-    // if (lesson !== undefined) {
-    //   this.selectedLesson = lesson;
-    // } else {
-    //   this.selectedGroup.lessonsInfo.push(new Lesson(item, null, null));
-    //   this.selectedLesson = this.selectedGroup.lessonsInfo[this.selectedGroup.lessonsInfo.length - 1];
-    // }
+    this.selectedLessonTeacher = item;
+    // this.generateLessons(item);
   }
 
   getLessonTime(subject) {
+    if (this.selectedGroup === undefined || this.selectedLessonTeacher === undefined) {
+      return 0;
+    }
+
+    if (this.selectedLessonTeacher.lessonsInfo.get(`${this.selectedGroup.iGroup}+${subject.iSubject}`) === undefined) {
+      this.selectedLessonTeacher.lessonsInfo.set(
+        `${this.selectedGroup.iGroup}+${subject.iSubject}`,
+        new Lesson(this.selectedGroup, subject, this.selectedLessonTeacher)
+      );
+    }
+    return this.selectedLessonTeacher.lessonsInfo.get(`${this.selectedGroup.iGroup}+${subject.iSubject}`).time;
+  }
+
+  setLessonTime(event, subject) {
+    if (this.selectedGroup !== undefined && this.selectedLessonTeacher !== undefined && subject !== undefined) {
+      this.selectedLessonTeacher.lessonsInfo.set(
+        `${this.selectedGroup.iGroup}+${subject.iSubject}`,
+        new Lesson(this.selectedGroup, subject, this.selectedLessonTeacher, event.target.valueAsNumber)
+      );
+    }
+  }
+
+  generateLessons(teacher) {
     if (this.selectedGroup === undefined) {
       return false;
     }
 
-    const lesson = this.selectedGroup.lessonsInfo.find(value => value.subject === subject);
-    if (lesson !== undefined) {
-      return lesson.time;
-    } else {
-      this.selectedGroup.lessonsInfo.push(new Lesson(subject, null, 0));
-      return this.selectedGroup.lessonsInfo[this.selectedGroup.lessonsInfo.length - 1].time;
-    }
-  }
-
-  setLessonTime(value, subject) {
-    console.log(this.selectedLesson);
-    if (value !== false ) {
-      this.selectedGroup.lessonsInfo.find(i => i.subject === subject).time = value;
-    }
+    this.schedule.subjects.forEach(subject => {
+      teacher.lessonsInfo.set(
+        `${this.selectedGroup.iGroup}+${subject.iSubject}`,
+        new Lesson(this.selectedGroup, subject, teacher)
+      );
+    });
   }
 }

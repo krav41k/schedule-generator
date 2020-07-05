@@ -1,4 +1,6 @@
 import {WorkingTime} from './WorkingTime';
+import {Lesson} from './Lesson';
+import {ScheduleTable} from './ScheduleTable';
 
 export class Teacher {
   name;
@@ -7,6 +9,10 @@ export class Teacher {
     available: 0,
     actually: 0
   };
+
+  public scheduleTable: ScheduleTable = new ScheduleTable();
+
+  public lessonsInfo: Map<string, Lesson> = new Map<string, Lesson>();
 
   days: string[] =  [
     'понедельник',
@@ -25,7 +31,5 @@ export class Teacher {
     6
   ];
 
-  timeProcessing() {
-
-  }
+  timeProcessing() {}
 }
